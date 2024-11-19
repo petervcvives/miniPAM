@@ -163,5 +163,6 @@ cython_debug/
 
 #My ignores
 DATA/
+miniPam.config
 
 
