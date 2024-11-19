@@ -1,6 +1,7 @@
 from .miniPAMDB import MiniPAMDBConnection
 import sqlite3
 import os
+from pathlib import Path
 
 class MiniPAMSQLite(MiniPAMDBConnection):
 	def __init__(self, dbfilepath):
@@ -12,6 +13,12 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 	def _connect(self):
 		print("CONNECTING....")
 		if(self.connection == None):
+			# check if the directory exists
+			path = Path(self.dbfilepath)
+			parentpath =  path.parent.absolute()
+			if not os.path.exists(path):
+				os.makedirs(parentpath)
+			# make the sqlite connection
 			self.connection = sqlite3.connect(self.dbfilepath)
 			print("DB CONNECTED!")
 		pass
