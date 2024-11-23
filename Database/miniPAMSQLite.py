@@ -106,9 +106,9 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 					""")
 				self.connection.commit()
 				print("Creating tables. DONE.")
-
-
 			cur.close()
+			return True
+		return False
 
 	def _searchAssetsDefinitionData(self, searchtext):
 		results = []

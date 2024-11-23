@@ -45,11 +45,27 @@ def SaveConfigFile():
 def main():
 	# Deside what database to load
 	dbconn = MiniPAMSQLite(CONFIGDATA["DatabasePath"])
-	dbconn.initialize()
+	if (dbconn.initialize()):
+		demoDataInput = input("Like to add example data (Y/N) ?  ")
+		if (len(demoDataInput)) > 0 and demoDataInput[0].lower() == "y":
+			print("ADDING EXAMPLE DATA....")
 	MiniPAMConsole(dbconn).start()
 
+def getFileLocation():
+	while True:
+		filepath = input("Enter a path for the SQlite database:")
+		if(os.path.splitext(filepath)[1] != ".db"):
+			print("Invalid file extention, must be '.db'")
+			continue
+		if (os.path.exists(filepath)):
+			print("File already exists, please enter an oter file location.")
+			continue
+		return filepath
+
+			
+
 # CHECK CONFIGURATION HERE
-def firstStart():
+def checkConfig():
 	global CONFIGDATA
 	print("You are starting this application for the first time. We need to make some configurations first.")
 	while True:
@@ -59,16 +75,15 @@ def firstStart():
 				dbpath = os.path.join(os.path.split(__file__)[0],"DATA","mimiPam.db")
 				break
 			case "C":
-				dbpath = input("Enter a path for the SQlite database:")
+				dbpath = getFileLocation()
 				break
 	CONFIGDATA = {"DatabasePath": dbpath }
-	print(CONFIGDATA)
 	SaveConfigFile()
 
 if __name__ == "__main__":
 	if LoadConfig():
 		main() # RUN THE PROGRAM HERE
 	else:
-		if firstStart():
-			pass # START AMIN WHEN CONFIGURATION IS SET OK
+		if checkConfig():
+			pass # START MAIN WHEN CONFIGURATION IS SET OK
 
