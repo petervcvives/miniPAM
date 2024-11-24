@@ -44,11 +44,13 @@ def SaveConfigFile():
 # MAIN PROGRAM WILL BE STARTED HERE, AFTER CONFIGURATION IS CHECKED!
 def main():
 	# Deside what database to load
+
+	#DEBUG DELETE THIS LINE !!!!
+	os.remove(CONFIGDATA["DatabasePath"])
+
 	dbconn = MiniPAMSQLite(CONFIGDATA["DatabasePath"])
-	if (dbconn.initialize()):
-		demoDataInput = input("Like to add example data (Y/N) ?  ")
-		if (len(demoDataInput)) > 0 and demoDataInput[0].lower() == "y":
-			print("ADDING EXAMPLE DATA....")
+	dbconn.initialize() 
+
 	MiniPAMConsole(dbconn).start()
 
 def getFileLocation():
