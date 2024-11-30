@@ -46,7 +46,7 @@ def main():
 	# Deside what database to load
 
 	#DEBUG DELETE THIS LINE !!!!
-	os.remove(CONFIGDATA["DatabasePath"])
+	#os.remove(CONFIGDATA["DatabasePath"])
 
 	dbconn = MiniPAMSQLite(CONFIGDATA["DatabasePath"])
 	dbconn.initialize() 
