@@ -2,6 +2,11 @@ from Logging.miniPAMLogger import Logger
 import os
 import sys
 
+try:
+    import gnureadline as readline
+except ImportError:
+    import readline
+
 class MiniPAMConsole():
 
 	def __init__(self, dbconnection):
@@ -11,6 +16,7 @@ class MiniPAMConsole():
 		2:(self.addNewAsset,"Add new asset"),
 		3:(self.searchInAssets,"Search in assets"),
 		4:(self.showAllAssets,"Show all assets"),
+		4:(self.updateAssets,"Update assets"),
 		}
 		self.maxRowWidth = 30
 
@@ -61,9 +67,12 @@ It is mini so it is a simple tool without a lot of features.""")
 		
 
 	def searchInAssets(self):
-		searchtext = input("Enter search text: ")
+		searchtext = input("Enter search text (leave empty to stop search): ")
+		if (len(searchtext) == 0):
+			return None
 		results = self.dbconn.searchAssets(searchtext)
 		self.__PrintAsTextTable(results)
+		return results
 
 	def addNewAsset(self):
 		name = input("Asset name: ")
@@ -93,11 +102,45 @@ It is mini so it is a simple tool without a lot of features.""")
 		results = self.dbconn.getAllAssets()
 		self.__PrintAsTextTable(results)
 
+	def updateAssets(self):
+		print("Seach for an asset to update.")
+		while(True):
+			result = self.searchInAssets()
+			if (result == None):
+				return
+			if (len(result) == 0):
+				print("No asets found! Try again...")
+			else:
+				break;
+		seletionToUpdate = self.__RequestListSelectiop(result)
+		default_value = "Pre-entered text"
+		user_input = input(f"Enter something [{default_value}]: ") or default_value
+		print(f"You entered: {user_input}")
+
+
+
+
 
 	def showAllCountTypes(self):
 		results = self.dbconn.getAllCountTypes()
 		self.__PrintAsTextTable(results)
 		
+
+	def __RequestListSelectiop(self,listdata):
+		while(True):
+			selection = input(f"Select an item from the list (1 - {len(listdata)}):")
+			try:
+				selectionint = int(selection)
+				if (selectionint <= 0 or selectionint >  len(listdata)):
+					print("Invalid input!")
+				else:
+					break
+			except Exception as e:
+				print("Invalid input!")
+		return listdata[selectionint]
+
+
+
 
 	def __PrintAsTextTable(self,results):
 		print("")
