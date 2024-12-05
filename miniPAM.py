@@ -3,6 +3,9 @@ import os
 from Logging.miniPAMLogger import Logger
 from ConsoleApp.miniPAMConsole import MiniPAMConsole 
 from Database.miniPAMSQLite import MiniPAMSQLite
+
+
+
 CONFIGPATH =  os.path.join(os.path.split(__file__)[0],"miniPAM.config") # DETECT CONFIG FILE PATH
 CONFIGDATA = None
 
@@ -11,6 +14,8 @@ ERRROLOGPATH = os.path.join(os.path.split(__file__)[0],"miniPAM.log") # DETECT L
 Logger.SetLoggingpath(ERRROLOGPATH)
 
 Logger.GetInstance().LogMessage("Logging started...")
+
+
 
 
 def LoadConfig():
@@ -88,4 +93,5 @@ if __name__ == "__main__":
 	else:
 		if checkConfig():
 			pass # START MAIN WHEN CONFIGURATION IS SET OK
+
 

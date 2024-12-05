@@ -2,10 +2,20 @@ from Logging.miniPAMLogger import Logger
 import os
 import sys
 
-try:
-    import gnureadline as readline
+try: 
+	import readline
+	print("'readline' loaded.")
 except ImportError:
-    import readline
+	try:
+		from pyreadline3 import Readline
+		readline = Readline()
+		print("'pyreadline3' loaded.")
+	except ImportErrorPyreadline3:
+		import gnureadline as readline
+		print("'gnureadline' loaded.")
+
+
+
 
 class MiniPAMConsole():
 
@@ -16,7 +26,8 @@ class MiniPAMConsole():
 		2:(self.addNewAsset,"Add new asset"),
 		3:(self.searchInAssets,"Search in assets"),
 		4:(self.showAllAssets,"Show all assets"),
-		4:(self.updateAssets,"Update assets"),
+		5:(self.updateAssets,"Update assets"),
+		6:(self.exportAllAssetsToCSV,"Export all assets to CSV file.")
 		}
 		self.maxRowWidth = 30
 
@@ -102,6 +113,8 @@ It is mini so it is a simple tool without a lot of features.""")
 		results = self.dbconn.getAllAssets()
 		self.__PrintAsTextTable(results)
 
+
+
 	def updateAssets(self):
 		print("Seach for an asset to update.")
 		while(True):
@@ -112,12 +125,23 @@ It is mini so it is a simple tool without a lot of features.""")
 				print("No asets found! Try again...")
 			else:
 				break;
-		seletionToUpdate = self.__RequestListSelectiop(result)
-		default_value = "Pre-entered text"
-		user_input = input(f"Enter something [{default_value}]: ") or default_value
-		print(f"You entered: {user_input}")
+		selectionToUpdate = self.__RequestListSelection(result)
+		for key in selectionToUpdate.keys():
+			print(key)
+			match(key):
+				case self.dbconn.ASSETDEFINITIONS_ID:
+					continue
+				case self.dbconn.ASSETSCOUNT_ID:
+					continue
+				case self.dbconn.COUNTTYPES_ID:
+					continue
 
+			selectionToUpdate[key] = self._Input_prefill(f"Update the '{key}'':", selectionToUpdate[key])
 
+		print(selectionToUpdate)
+
+	def exportAllAssetsToCSV(self):
+		pass
 
 
 
@@ -126,7 +150,7 @@ It is mini so it is a simple tool without a lot of features.""")
 		self.__PrintAsTextTable(results)
 		
 
-	def __RequestListSelectiop(self,listdata):
+	def __RequestListSelection(self,listdata):
 		while(True):
 			selection = input(f"Select an item from the list (1 - {len(listdata)}):")
 			try:
@@ -172,3 +196,11 @@ It is mini so it is a simple tool without a lot of features.""")
 
 
 
+	def _Input_prefill(self,prompt, text):
+	    def hook():
+	        readline.insert_text(text)
+	        readline.redisplay()
+	    readline.set_pre_input_hook(hook)
+	    result = input(prompt)
+	    readline.set_pre_input_hook()
+	    return result
