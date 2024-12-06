@@ -12,7 +12,6 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 		print(f"Database path: {self.dbfilepath} ")
 
 	def _connect(self):
-		# print("CONNECTING....")
 		if(self.connection == None):
 			# check if the directory exists
 			path = Path(self.dbfilepath)
@@ -20,13 +19,11 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 			os.makedirs(parentpath,exist_ok = True)
 			# make the sqlite connection
 			self.connection = sqlite3.connect(self.dbfilepath)
-			# print("DB CONNECTED!")
 		pass
 
 	def _disconnect(self):
 		if(self.connection == None):
 			self.connection.close()
-			# print("DB DISCONNECTED!")
 
 
 	def _addAssetsDefinitionData(self, data):
@@ -37,9 +34,6 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 					VALUES ('{data[self.ASSETDEFINITIONS_ID]}','{data[self.ASSETDEFINITIONS_Name]}','{data[self.ASSETDEFINITIONS_Description]}','{data[self.ASSETDEFINITIONS_UnitTypeID]}');
 					""")
 			self.connection.commit()
-		print(data[self.ASSETDEFINITIONS_ID])
-		print(dir(data[self.ASSETDEFINITIONS_ID]))
-		print(data[self.ASSETDEFINITIONS_ID])
 		self.addCountValue(0,data[self.ASSETDEFINITIONS_ID])
 
 
@@ -53,7 +47,6 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 					{self.ASSETDEFINITIONS_UnitTypeID} = '{data[self.ASSETDEFINITIONS_UnitTypeID]}'
 					WHERE {self.ASSETDEFINITIONS_ID} = '{data[self.ASSETDEFINITIONS_ID]}';
 					"""
-			print(updatequery)
 			cur.execute(updatequery)
 			self.connection.commit()
 

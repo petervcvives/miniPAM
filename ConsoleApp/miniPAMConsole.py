@@ -32,12 +32,11 @@ class MiniPAMConsole():
 		6:(self.__exportAllAssetsToCSV,"Export all assets to CSV file.")
 		}
 		self.maxRowWidth = 30
-		a = 1/0
 
 	def exitConsole(self):
 		sys.exit()
 
-	def mainMenu(self):
+	def __mainMenu(self):
 		while True:
 			print("********* miniPAM console menu **********")
 			selectedMenuNr = -1
@@ -71,10 +70,10 @@ class MiniPAMConsole():
 		self.clearScreen()
 		print(
 		"""Welcome to the miniPAM console.
-The mini Personal Assets Management application has been created to manage your personal assets like bottels of wine, electronics componenets, or anything you like need to manage.
+The mini Personal Assets Management application has been created to manage your personal assets like bottels of wine, electronics componenets, or anything you need to manage.
 It is mini so it is a simple tool without a lot of features.""")
 
-		self.mainMenu()
+		self.__mainMenu()
 
 	def clearScreen(self):
 		os.system('cls' if os.name == 'nt' else 'clear')
@@ -119,9 +118,9 @@ It is mini so it is a simple tool without a lot of features.""")
 
 
 	def __updateAssets(self):
-		print("Seach for an asset to update.")
+		print("Search for an asset to update.")
 		while(True):
-			result = self.searchInAssets()
+			result = self.__searchInAssets()
 			if (result == None):
 				return
 			if (len(result) == 0):
@@ -199,8 +198,6 @@ It is mini so it is a simple tool without a lot of features.""")
 			except Exception as e:
 				print("Invalid input!")
 		return listdata[selectionint-1]
-
-
 
 
 	def __PrintAsTextTable(self,results):

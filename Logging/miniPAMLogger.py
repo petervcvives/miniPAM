@@ -27,7 +27,7 @@ class Logger(object):
 		if (Logger._LoggingPath != None):
 			with open(Logger._LoggingPath,"a") as logstream:
 				logstream.write(f"{datetime.now()} => {text}\n")
-	def LogException(self,ex)
+				
 	def LogException(self,ex):
 		self.LogMessage(f"{ex}")
 		raise ex
