@@ -1,5 +1,6 @@
 
 from datetime import datetime
+import logging
 
 class Logger(object):
 	""" This logger will handle the exception logging ane other messages logging. 
@@ -26,8 +27,9 @@ class Logger(object):
 		if (Logger._LoggingPath != None):
 			with open(Logger._LoggingPath,"a") as logstream:
 				logstream.write(f"{datetime.now()} => {text}\n")
-
+	def LogException(self,ex)
 	def LogException(self,ex):
-		raise ex
 		self.LogMessage(f"{ex}")
+		raise ex
+		
 		

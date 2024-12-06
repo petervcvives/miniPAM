@@ -48,15 +48,19 @@ def SaveConfigFile():
 
 # MAIN PROGRAM WILL BE STARTED HERE, AFTER CONFIGURATION IS CHECKED!
 def main():
-	# Deside what database to load
+	try:
+		# Deside what database to load (dbconn), for no only SQLite exists but whe could implment an other database by implementing the 'abstract' class MiniPAMDBConnection
+		dbconn = MiniPAMSQLite(CONFIGDATA["DatabasePath"])
+		dbconn.initialize() 
 
-	#DEBUG DELETE THIS LINE !!!!
-	#os.remove(CONFIGDATA["DatabasePath"])
+		# Deside here what unser inteface to load, here we choose the for now only existing the MiniPAMConsole as as interface.
+		# When we would create and other user interce, for example a web interface, then we can make desired selection here. 
+		MiniPAMConsole(dbconn).start()
+	except Exception as e:
+		Logger.GetInstance().LogException(e)
 
-	dbconn = MiniPAMSQLite(CONFIGDATA["DatabasePath"])
-	dbconn.initialize() 
 
-	MiniPAMConsole(dbconn).start()
+
 
 def getFileLocation():
 	while True:
@@ -88,7 +92,7 @@ def checkConfig():
 	SaveConfigFile()
 
 if __name__ == "__main__":
-	if LoadConfig():
+	if LoadConfig():  # TRY TO LOAD THE CONFIGURATION HERE
 		main() # RUN THE PROGRAM HERE
 	else:
 		if checkConfig():

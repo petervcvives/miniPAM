@@ -1,18 +1,20 @@
 from Logging.miniPAMLogger import Logger
 import os
 import sys
+from datetime import datetime
+import csv
 
 try: 
-	import readline
-	print("'readline' loaded.")
+	import gnureadline as readline
+	print("'gnureadline' loaded.")
 except ImportError:
 	try:
 		from pyreadline3 import Readline
 		readline = Readline()
 		print("'pyreadline3' loaded.")
 	except ImportErrorPyreadline3:
-		import gnureadline as readline
-		print("'gnureadline' loaded.")
+		import readline
+		print("'readline' loaded.")
 
 
 
@@ -22,14 +24,15 @@ class MiniPAMConsole():
 	def __init__(self, dbconnection):
 		self.dbconn = dbconnection
 		self.FunctionCallerList = {
-		1:(self.showAllCountTypes,"Show all count types"),
-		2:(self.addNewAsset,"Add new asset"),
-		3:(self.searchInAssets,"Search in assets"),
-		4:(self.showAllAssets,"Show all assets"),
-		5:(self.updateAssets,"Update assets"),
-		6:(self.exportAllAssetsToCSV,"Export all assets to CSV file.")
+		1:(self.__showAllUnitTypes,"Show all count types"),
+		2:(self.__addNewAsset,"Add new asset"),
+		3:(self.__searchInAssets,"Search in assets"),
+		4:(self.__showAllAssets,"Show all assets"),
+		5:(self.__updateAssets,"Update assets"),
+		6:(self.__exportAllAssetsToCSV,"Export all assets to CSV file.")
 		}
 		self.maxRowWidth = 30
+		a = 1/0
 
 	def exitConsole(self):
 		sys.exit()
@@ -75,9 +78,10 @@ It is mini so it is a simple tool without a lot of features.""")
 
 	def clearScreen(self):
 		os.system('cls' if os.name == 'nt' else 'clear')
+		pass
 		
 
-	def searchInAssets(self):
+	def __searchInAssets(self):
 		searchtext = input("Enter search text (leave empty to stop search): ")
 		if (len(searchtext) == 0):
 			return None
@@ -85,15 +89,14 @@ It is mini so it is a simple tool without a lot of features.""")
 		self.__PrintAsTextTable(results)
 		return results
 
-	def addNewAsset(self):
+	def __addNewAsset(self):
 		name = input("Asset name: ")
 		descr = input("Asset description: ")
-		selectedunit = self.SelectUnitType()
-		print(selectedunit)
-		self.dbconn.saveAssetsDefinition(name,descr,selectedunit[self.dbconn.COUNTTYPES_ID])
+		selectedunit = self.selectUnitType()
+		self.dbconn.saveAssetsDefinition(name,descr,selectedunit[self.dbconn.UNITTYPES_ID])
 
-	def SelectUnitType(self):
-		results = self.dbconn.getAllCountTypes()
+	def selectUnitType(self):
+		results = self.dbconn.getAllUnitTypes()
 		self.__PrintAsTextTable(results)
 		while True:
 			selection = input("Select unit type:")
@@ -109,13 +112,13 @@ It is mini so it is a simple tool without a lot of features.""")
 
 			
 
-	def showAllAssets(self):
+	def __showAllAssets(self):
 		results = self.dbconn.getAllAssets()
 		self.__PrintAsTextTable(results)
 
 
 
-	def updateAssets(self):
+	def __updateAssets(self):
 		print("Seach for an asset to update.")
 		while(True):
 			result = self.searchInAssets()
@@ -127,26 +130,60 @@ It is mini so it is a simple tool without a lot of features.""")
 				break;
 		selectionToUpdate = self.__RequestListSelection(result)
 		for key in selectionToUpdate.keys():
-			print(key)
 			match(key):
 				case self.dbconn.ASSETDEFINITIONS_ID:
 					continue
 				case self.dbconn.ASSETSCOUNT_ID:
 					continue
-				case self.dbconn.COUNTTYPES_ID:
+				case self.dbconn.UNITTYPES_ID:
 					continue
-
-			selectionToUpdate[key] = self._Input_prefill(f"Update the '{key}'':", selectionToUpdate[key])
-
-		print(selectionToUpdate)
-
-	def exportAllAssetsToCSV(self):
-		pass
+				case self.dbconn.ASSETDEFINITIONS_UnitTypeID:
+					continue
+			selectionToUpdate[key] = self._Input_prefill(f"Update the '{key}': ", selectionToUpdate[key])
+		self.dbconn.saveAssetsDefinition(selectionToUpdate[self.dbconn.ASSETDEFINITIONS_Name],selectionToUpdate[self.dbconn.ASSETDEFINITIONS_Description],selectionToUpdate[self.dbconn.ASSETDEFINITIONS_UnitTypeID],selectionToUpdate[self.dbconn.ASSETDEFINITIONS_ID])
 
 
 
-	def showAllCountTypes(self):
-		results = self.dbconn.getAllCountTypes()
+	def __exportAllAssetsToCSV(self):
+		exportdata = self.dbconn.getAllAssets()
+		if (len(exportdata) == 0):
+			print("Nothing to export")
+			return
+		while(True):
+			print("Enter a folder path to export the assets:")
+			usersdir = os.path.expanduser("~")
+			randomfilename = f"AssetsExport_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+			csvpath = os.path.join(usersdir,f"{randomfilename}.csv")
+			csvpath = self._Input_prefill("> ",csvpath)
+			if (not os.path.exists(csvpath)):
+				break
+			else:
+				if(self.__RequestYesNo("Overwrite the existing file?",False)):
+					break
+		try:
+			os.makedirs(os.path.dirname(csvpath),exist_ok = True)
+			#Export the data with the selected path
+			self.__WriteDictToCSV(exportdata,csvpath)
+
+		except Exception as e:
+			print("Export to csv file is not possible due to the following error:")
+			print(e)
+
+
+	def __WriteDictToCSV(self,exportdata, csvpath):
+		with open(csvpath, 'w', newline='') as csvfile:
+		    fieldnames = []
+		    for key in exportdata[0].keys():
+		    	fieldnames.append(key)
+		    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+		    writer.writeheader()
+		    for item in exportdata:
+		    	writer.writerow(item)
+
+
+
+	def __showAllUnitTypes(self):
+		results = self.dbconn.getAllUnitTypes()
 		self.__PrintAsTextTable(results)
 		
 
@@ -161,7 +198,7 @@ It is mini so it is a simple tool without a lot of features.""")
 					break
 			except Exception as e:
 				print("Invalid input!")
-		return listdata[selectionint]
+		return listdata[selectionint-1]
 
 
 
@@ -180,7 +217,9 @@ It is mini so it is a simple tool without a lot of features.""")
 						continue
 					case self.dbconn.ASSETSCOUNT_ID:
 						continue
-					case self.dbconn.COUNTTYPES_ID:
+					case self.dbconn.UNITTYPES_ID:
+						continue
+					case self.dbconn.ASSETDEFINITIONS_UnitTypeID:
 						continue
 
 				headerresults.append(f"{key:<{self.maxRowWidth}}")
@@ -193,7 +232,12 @@ It is mini so it is a simple tool without a lot of features.""")
 		print("")
 
 
-
+	def __RequestYesNo(self, question, default = False):
+		while(True):
+			result = self._Input_prefill(f"{question} (Y,N):", "Y" if default else "N")
+			if (result.upper() == "Y") : return True
+			if (result.upper() == "N") : return False
+			print("Answer with the letter Y (yes) or N (No).")
 
 
 	def _Input_prefill(self,prompt, text):

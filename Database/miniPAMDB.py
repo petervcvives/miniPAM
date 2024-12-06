@@ -5,21 +5,20 @@ class MiniPAMDBConnection(object):
 
 	# TABLE NAMES AND COLUMS
 	ASSETDEFINITIONS = "AssetsDefinitions"
-	ASSETDEFINITIONS_ID = "ID"
+	ASSETDEFINITIONS_ID = "AssetID"
 	ASSETDEFINITIONS_Name = "Name"
 	ASSETDEFINITIONS_Description = "Description"
-	ASSETDEFINITIONS_CountTypeID = "CountUnitID"
+	ASSETDEFINITIONS_UnitTypeID = "UnitTypeID"
 
 	ASSETSCOUNT = "AssetsCount"
 	ASSETSCOUNT_ID = "AssetID"
 	ASSETSCOUNT_AMOUNT = "Amount"
 	ASSETSCOUNT_DATE = "CountDate"
-	#ASSETSCOUNT_TypeID = "CountUnitID"
 
-	COUNTTYPES = "CountUnits"
-	COUNTTYPES_ID = "ID"
-	COUNTTYPES_Name = "Name"
-	COUNTTYPES_Description = "Description"
+	UNITTYPES = "CountUnits"
+	UNITTYPES_ID = "UnitID"
+	UNITTYPES_Name = "Name"
+	UNITTYPES_Description = "Description"
 
 	"""docstring for miniPAMDbConnection"""
 	def __init__(self):
@@ -55,11 +54,11 @@ class MiniPAMDBConnection(object):
 
 
 
-	def _getAllCountTypes(self):
+	def _getAllUnitTypes(self):
 		pass
 
 
-	def _addCountData(self,value,assetKey,timestamp):
+	def _addUnitData(self,value,assetKey,timestamp):
 		pass
 
 	def _getAllAssetsDefinitionData(self):
@@ -82,7 +81,7 @@ class MiniPAMDBConnection(object):
 			f"{self.ASSETDEFINITIONS_ID}":f"{uuid}",
 			f"{self.ASSETDEFINITIONS_Name}":f"{name}",
 			f"{self.ASSETDEFINITIONS_Description}":f"{description}",
-			f"{self.ASSETDEFINITIONS_CountTypeID}":f"{unitId}",
+			f"{self.ASSETDEFINITIONS_UnitTypeID}":f"{unitId}",
 		}
 		if (addData):
 			self._addAssetsDefinitionData(data)
@@ -106,16 +105,16 @@ class MiniPAMDBConnection(object):
 
 
 
-	def getAllCountTypes(self):
+	def getAllUnitTypes(self):
 		self._connect()
-		result = self._getAllCountTypes()
+		result = self._getAllUnitTypes()
 		self._disconnect()
 		return result
 
 	def addCountValue(self,value, assetkey):
 		timenow = datetime.now()
 		self._connect()
-		self._addCountData(value,assetkey,timenow)
+		self._addUnitData(value,assetkey,timenow)
 		self._disconnect()
 
 	def getAllAssets(self):

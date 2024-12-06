@@ -3,10 +3,6 @@ import sqlite3
 import os
 from pathlib import Path
 
-#SELECT AssetsDefinitions.*,CountUnits.Name,CountUnits.Description , SUM(AssetsCount.Amount) as Amount FROM AssetsDefinitions 
-#INNER JOIN CountUnits ON AssetsDefinitions.CountUnitID = CountUnits.ID
-#INNER JOIN AssetsCount ON AssetsDefinitions.Id = AssetsCount.AssetID
-
 
 class MiniPAMSQLite(MiniPAMDBConnection):
 	def __init__(self, dbfilepath):
@@ -37,8 +33,8 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 		if(self.connection != None):
 			cur = self.connection.cursor()
 			cur.execute(f"""
-					INSERT INTO  {self.ASSETDEFINITIONS}({self.ASSETDEFINITIONS_ID},{self.ASSETDEFINITIONS_Name},{self.ASSETDEFINITIONS_Description},{self.ASSETDEFINITIONS_CountTypeID}) 
-					VALUES ('{data[self.ASSETDEFINITIONS_ID]}','{data[self.ASSETDEFINITIONS_Name]}','{data[self.ASSETDEFINITIONS_Description]}','{data[self.ASSETDEFINITIONS_CountTypeID]}');
+					INSERT INTO  {self.ASSETDEFINITIONS}({self.ASSETDEFINITIONS_ID},{self.ASSETDEFINITIONS_Name},{self.ASSETDEFINITIONS_Description},{self.ASSETDEFINITIONS_UnitTypeID}) 
+					VALUES ('{data[self.ASSETDEFINITIONS_ID]}','{data[self.ASSETDEFINITIONS_Name]}','{data[self.ASSETDEFINITIONS_Description]}','{data[self.ASSETDEFINITIONS_UnitTypeID]}');
 					""")
 			self.connection.commit()
 		print(data[self.ASSETDEFINITIONS_ID])
@@ -50,15 +46,16 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 	def _updateAssetsDefinitionData(self, data):
 		if(self.connection != None):
 			cur = self.connection.cursor()
-			cur.execute(f"""
+			updatequery = f"""
 					UPDATE {self.ASSETDEFINITIONS} SET
 					{self.ASSETDEFINITIONS_Name} = '{data[self.ASSETDEFINITIONS_Name]}',
 					{self.ASSETDEFINITIONS_Description} = '{data[self.ASSETDEFINITIONS_Description]}',
-					{self.ASSETDEFINITIONS_Description} = '{data[self.ASSETDEFINITIONS_Description]}'
-					WHERE {self.ASSETDEFINITIONS_CountTypeID} = '{data[self.ASSETDEFINITIONS_CountTypeID]}';
-					""")
+					{self.ASSETDEFINITIONS_UnitTypeID} = '{data[self.ASSETDEFINITIONS_UnitTypeID]}'
+					WHERE {self.ASSETDEFINITIONS_ID} = '{data[self.ASSETDEFINITIONS_ID]}';
+					"""
+			print(updatequery)
+			cur.execute(updatequery)
 			self.connection.commit()
-			# print("UPDATED!!!")
 
 	def _deleteAssetsDefinitionData(self, uuid):
 		pass
@@ -78,12 +75,12 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 						{self.ASSETDEFINITIONS_ID} TEXT PRIMARY KEY , 
 						{self.ASSETDEFINITIONS_Name} TEXT NOT NULL,
 						{self.ASSETDEFINITIONS_Description} TEXT NOT NULL,
-						{self.ASSETDEFINITIONS_CountTypeID} TEXT NOT NULL
+						{self.ASSETDEFINITIONS_UnitTypeID} TEXT NOT NULL
 						);
 					""")
 
 #						FOREIGN KEY({self.ASSETDEFINITIONS_ID}) REFERENCES {self.ASSETSCOUNT}({self.ASSETSCOUNT_ID}),
-#						FOREIGN KEY({self.ASSETDEFINITIONS_CountTypeID}) REFERENCES {self.COUNTTYPES}({self.COUNTTYPES_ID})
+#						FOREIGN KEY({self.ASSETDEFINITIONS_UnitTypeID}) REFERENCES {self.UNITTYPES}({self.UNITTYPES_ID})
 
 				# CREATE TABLE AssetsCount
 				cur.execute(f"""
@@ -94,18 +91,18 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 						);
 					""")
 
-				# CREATE TABLE CountTypes
+				# CREATE TABLE UnitTypes
 				cur.execute(f"""
-					CREATE TABLE {self.COUNTTYPES}(
-						{self.COUNTTYPES_ID} TEXT PRIMARY KEY, 
-						{self.COUNTTYPES_Name} TEXT NOT NULL,
-						{self.COUNTTYPES_Description} TEXT NOT NULL
+					CREATE TABLE {self.UNITTYPES}(
+						{self.UNITTYPES_ID} TEXT PRIMARY KEY, 
+						{self.UNITTYPES_Name} TEXT NOT NULL,
+						{self.UNITTYPES_Description} TEXT NOT NULL
 						);
 					""")
 
 				#INSERT DEFAULT CountTypes
 				cur.execute(f"""
-					INSERT INTO  {self.COUNTTYPES}({self.COUNTTYPES_ID},{self.COUNTTYPES_Name},{self.COUNTTYPES_Description}) VALUES
+					INSERT INTO  {self.UNITTYPES}({self.UNITTYPES_ID},{self.UNITTYPES_Name},{self.UNITTYPES_Description}) VALUES
 					("{self.getNewUUID()}","Pcs","Pieces"),
 					("{self.getNewUUID()}","g","Grams"),
 					("{self.getNewUUID()}","l","Liters"),
@@ -128,26 +125,28 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 	def _searchAssetsDefinitionData(self, searchtext):
 		results = []
 		cur = self.connection.cursor()
-		res = cur.execute(f"SELECT {self.ASSETDEFINITIONS_ID},{self.ASSETDEFINITIONS_Name},{self.ASSETDEFINITIONS_Description} FROM {self.ASSETDEFINITIONS} where {self.ASSETDEFINITIONS_Name} LIKE '%{searchtext}%' OR {self.ASSETDEFINITIONS_Description} LIKE '%{searchtext}%';")
+		selectquery = f"SELECT {self.ASSETDEFINITIONS_ID},{self.ASSETDEFINITIONS_Name},{self.ASSETDEFINITIONS_Description},{self.ASSETDEFINITIONS_UnitTypeID} FROM {self.ASSETDEFINITIONS} where {self.ASSETDEFINITIONS_Name} LIKE '%{searchtext}%' OR {self.ASSETDEFINITIONS_Description} LIKE '%{searchtext}%';"
+		res = cur.execute(selectquery)
 		for row in res.fetchall():
 			rowresult = {
 				f"{self.ASSETDEFINITIONS_ID}":f"{row[0]}",
 				f"{self.ASSETDEFINITIONS_Name}":f"{row[1]}",
-				f"{self.ASSETDEFINITIONS_Description}":f"{row[2]}"
+				f"{self.ASSETDEFINITIONS_Description}":f"{row[2]}",
+				f"{self.ASSETDEFINITIONS_UnitTypeID}":f"{row[3]}"
 			}
 			results.append(rowresult)
 		return results
 
 
-	def _getAllCountTypes(self):
+	def _getAllUnitTypes(self):
 		results = []
 		cur = self.connection.cursor()
-		res = cur.execute(f"SELECT {self.COUNTTYPES_ID},{self.COUNTTYPES_Name},{self.COUNTTYPES_Description} FROM {self.COUNTTYPES}")
+		res = cur.execute(f"SELECT {self.UNITTYPES_ID},{self.UNITTYPES_Name},{self.UNITTYPES_Description} FROM {self.UNITTYPES}")
 		for row in res.fetchall():
 			rowresult = {
-				f"{self.COUNTTYPES_ID}":f"{row[0]}",
-				f"{self.COUNTTYPES_Name}":f"{row[1]}",
-				f"{self.COUNTTYPES_Description}":f"{row[2]}"
+				f"{self.UNITTYPES_ID}":f"{row[0]}",
+				f"{self.UNITTYPES_Name}":f"{row[1]}",
+				f"{self.UNITTYPES_Description}":f"{row[2]}"
 			}
 			results.append(rowresult)
 		return results
@@ -155,8 +154,7 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 
 	def _getUnitTypeId(self,unitname):
 		cur = self.connection.cursor()
-		selectquery = f"SELECT {self.COUNTTYPES_ID} FROM {self.COUNTTYPES} where {self.COUNTTYPES_Name} LIKE '{unitname}';"
-		print(selectquery)
+		selectquery = f"SELECT {self.UNITTYPES_ID} FROM {self.UNITTYPES} where {self.UNITTYPES_Name} LIKE '{unitname}';"
 		res = cur.execute(selectquery)
 		for row in res.fetchall():
 			return row[0]
@@ -165,23 +163,16 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 	def _getAllAssetsDefinitionData(self):
 		results = []
 		cur = self.connection.cursor()
-
-
-		selectquery = f"""SELECT {self.ASSETDEFINITIONS}.*,  SUM({self.ASSETSCOUNT}.{self.ASSETSCOUNT_AMOUNT}) AS Amount , {self.COUNTTYPES}.{self.COUNTTYPES_Name} FROM {self.ASSETDEFINITIONS} 
-		INNER JOIN {self.COUNTTYPES} ON {self.ASSETDEFINITIONS}.{self.ASSETDEFINITIONS_CountTypeID} = {self.COUNTTYPES}.{self.COUNTTYPES_ID}
+		selectquery = f"""SELECT {self.ASSETDEFINITIONS}.*,  SUM({self.ASSETSCOUNT}.{self.ASSETSCOUNT_AMOUNT}) AS Amount , {self.UNITTYPES}.{self.UNITTYPES_Name} FROM {self.ASSETDEFINITIONS} 
+		INNER JOIN {self.UNITTYPES} ON {self.ASSETDEFINITIONS}.{self.ASSETDEFINITIONS_UnitTypeID} = {self.UNITTYPES}.{self.UNITTYPES_ID}
 		INNER JOIN {self.ASSETSCOUNT}  ON {self.ASSETDEFINITIONS}.{self.ASSETDEFINITIONS_ID} = {self.ASSETSCOUNT}.{self.ASSETSCOUNT_ID} GROUP BY ({self.ASSETDEFINITIONS}.{self.ASSETDEFINITIONS_ID})"""
-
-
-		print(selectquery)
-
 		res = cur.execute(selectquery)
-
 		for row in res.fetchall():
 			rowresult = {
 				f"{self.ASSETDEFINITIONS_ID}":f"{row[0]}",
 				f"{self.ASSETDEFINITIONS_Name}":f"{row[1]}",
 				f"{self.ASSETDEFINITIONS_Description}":f"{row[2]}",
-				f"{self.COUNTTYPES_ID}":f"{row[3]}",
+				f"{self.UNITTYPES_ID}":f"{row[3]}",
 				f"{self.ASSETSCOUNT_AMOUNT}":f"{row[4]}",
 				f"Unit":f"{row[5]}"
 			}
@@ -189,14 +180,12 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 		return results
 		pass
 
-	def _addCountData(self,amount,assetKey,timestamp):
-		print("Adding count data...")
 
-		print(f"=====> {assetKey}")
+	def _addUnitData(self,amount,assetKey,timestamp):
+		print("Adding count data...")
 		cur = self.connection.cursor()
 		insertQuery = f"""INSERT INTO  {self.ASSETSCOUNT}({self.ASSETSCOUNT_ID},{self.ASSETSCOUNT_AMOUNT},{self.ASSETSCOUNT_DATE}) 
 		VALUES ('{assetKey}',{amount},'{timestamp.strftime("%Y-%m-%d %H:%M:%S")}');""" 
-		print(insertQuery)
 		cur.execute(insertQuery)
 		self.connection.commit()
 		cur.close()
