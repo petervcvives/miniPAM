@@ -7,16 +7,13 @@ import csv
 try: 
 	import gnureadline as readline
 	print("'gnureadline' loaded.")
-except ImportError:
+except ImportError as e:
 	try:
-		from pyreadline3 import Readline
-		readline = Readline()
-		print("'pyreadline3' loaded.")
-	except ImportErrorPyreadline3:
 		import readline
 		print("'readline' loaded.")
-
-
+	except ImportError as ex2:
+		raise ex2
+		
 
 
 class MiniPAMConsole():
