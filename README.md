@@ -15,6 +15,10 @@ To run the tool create a venv and install the 'requirements_win' for windows and
 
 To start the tool run "python miniPam.py" in a venv updated with the requirements_win.txt or requirements_macos installed.
 
+# First time start
+
+When started for the first time it wil create a SQlite database and a configuration file. It will ask where to save the SQLlite database and the configuration file will be saved in root folder as 'miniPAM.config'. The default database location will be 
+
 # Implemented functionality
 
 The foloowing function are implemneted
@@ -29,3 +33,15 @@ The foloowing function are implemneted
 	
 
 # Code structure
+
+The tool exists out of 3 folders:
+
+- ConsoleApp: Contain the console application. The console is startedfrom main miniPAM.py. It is not starte using the class `MiniPAMConsole`, using the start() function. The database connection class is provided duringon of the console object in the constructor.
+
+
+- Database: Contains two classes `MiniPAMDBConnection` and `MiniPAMSQLite`. The `MiniPAMDBConnection` is an 'abstract' class that acts as the template for the `MiniPAMSQLite` (inherits from MiniPAMDBConnection`). It is the `MiniPAMSQLite` class that will be instatiated and used in miniPAM.py. Because we use the abstract `MiniPAMDBConnection` class we can easy interchange the SQLite database with an other database by implmenting `MiniPAMDBConnection` into a new class. 
+
+
+- Logging: Conatains a class that handles some logging. The class is a singleton that can be used by calling Logger.GetInstance() to get the `Logger` object.
+
+
