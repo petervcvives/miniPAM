@@ -21,7 +21,7 @@ class MiniPAMConsole():
 	def __init__(self, dbconnection):
 		self.dbconn = dbconnection
 		self.FunctionCallerList = {
-		1:(self.__showAllUnitTypes,"Show all count types"),
+		1:(self.__showAllUnitTypes,"Show all unit types"),
 		2:(self.__addNewAsset,"Add new asset"),
 		3:(self.__searchInAssets,"Search in assets"),
 		4:(self.__showAllAssets,"Show all assets"),
@@ -68,7 +68,7 @@ class MiniPAMConsole():
 		print(
 		"""Welcome to the miniPAM console.
 The mini Personal Assets Management application has been created to manage your personal assets like bottels of wine, electronics componenets, or anything you need to manage.
-It is mini so it is a simple tool without a lot of features.""")
+It is a simple tool without a lot of features.""")
 
 		self.__mainMenu()
 

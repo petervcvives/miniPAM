@@ -3,7 +3,7 @@ import os
 from Logging.miniPAMLogger import Logger
 from ConsoleApp.miniPAMConsole import MiniPAMConsole 
 from Database.miniPAMSQLite import MiniPAMSQLite
-
+from pathlib import Path
 
 
 CONFIGPATH =  os.path.join(os.path.split(__file__)[0],"miniPAM.config") # DETECT CONFIG FILE PATH
@@ -71,6 +71,15 @@ def getFileLocation():
 		if (os.path.exists(filepath)):
 			print("File already exists, please enter an oter file location.")
 			continue
+		try:
+			parentpath =  Path(filepath).parent.absolute()
+			os.makedirs(parentpath,exist_ok = True)
+			with open(filepath,"x") as teststream:
+				teststream.write("test")
+			os.remove(filepath)
+		except Exception as e:
+			print(f"File path invalid, try an other location. ({e})")
+			continue
 		return filepath
 
 			
@@ -78,24 +87,32 @@ def getFileLocation():
 # CHECK CONFIGURATION HERE
 def checkConfig():
 	global CONFIGDATA
-	print("You are starting this application for the first time. We need to make some configurations first.")
-	while True:
-		result = input("Do you like to put the SQlite data in the default location (D) or choose a location (C) ?")
-		match result.upper():
-			case "D":
-				dbpath = os.path.join(os.path.split(__file__)[0],"DATA","mimiPam.db")
-				break
-			case "C":
-				dbpath = getFileLocation()
-				break
-	CONFIGDATA = {"DatabasePath": dbpath }
-	SaveConfigFile()
+	try:
+		print("You are starting this application for the first time. We need to make some configurations first.")
+		while True:
+			result = input("Do you like to put the SQlite data in the default location (D) or choose a location (C) ?")
+			match result.upper():
+				case "D":
+					dbpath = os.path.join(os.path.split(__file__)[0],"DATA","mimiPam.db")
+					break
+				case "C":
+					dbpath = getFileLocation()
+					break
+		CONFIGDATA = {"DatabasePath": dbpath }
+		SaveConfigFile()
+		return True
+	except Exception as e:
+		Logger.GetInstance().LogException(e)
+		return False
 
 if __name__ == "__main__":
 	if LoadConfig():  # TRY TO LOAD THE CONFIGURATION HERE
 		main() # RUN THE PROGRAM HERE
 	else:
-		if checkConfig():
+		if checkConfig(): # TRY TO CONFIGURE THE APPLICATION HERE
+			main() # RUN THE PROGRAM HERE
 			pass # START MAIN WHEN CONFIGURATION IS SET OK
+		else:
+			print("Something went wrong, configuration is not set correct!")
 
 
