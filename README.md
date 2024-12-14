@@ -42,7 +42,7 @@ The tool exists out of 3 folders:
 
 - ConsoleApp: Contain the console application. It is started using the class `MiniPAMConsole`with the  the start() function (This is started from main miniPAM.py file). The database connection class is provided in the  the constructor of the 'MiniPAMConsole' class.
 
-- Database: Contains two classes `MiniPAMDBConnection` and `MiniPAMSQLite`. The `MiniPAMDBConnection` is an 'abstract' class that acts as the template for the `MiniPAMSQLite` (inherits from MiniPAMDBConnection`). It is the `MiniPAMSQLite` class that will be instantiated and used in miniPAM.py. Because we use the "abstract" `MiniPAMDBConnection` class we can easily interchange the SQLite database with another database by implementing `MiniPAMDBConnection` into a new class. 
+- Database: Contains two classes `MiniPAMDBConnection` and `MiniPAMSQLite`. The `MiniPAMDBConnection` is an 'abstract' class that acts as the template for the `MiniPAMSQLite` (inherits from `MiniPAMDBConnection`). It is the `MiniPAMSQLite` class that will be instantiated and used in miniPAM.py. Because we use the "abstract" `MiniPAMDBConnection` class we can easily interchange the SQLite database with another database by implementing `MiniPAMDBConnection` into a new class. 
 
 
 - Logging: Contains a class that handles some logging. The class is a singleton that can be used by calling Logger.GetInstance() to get the `Logger` object.
