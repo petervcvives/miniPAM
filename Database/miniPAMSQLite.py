@@ -100,7 +100,7 @@ class MiniPAMSQLite(MiniPAMDBConnection):
 					("{self.getNewUUID()}","g","Grams"),
 					("{self.getNewUUID()}","l","Liters"),
 					("{self.getNewUUID()}","GL","Gallons"),
-					("{self.getNewUUID()}","Botles","Botles")
+					("{self.getNewUUID()}","Bottles","Bottles")
 					;
 					""")
 				self.connection.commit()
